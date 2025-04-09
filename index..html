@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Tareas</title>
+  <style>
+    body {
+      background-color: #f4f4f4;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      padding-top: 50px;
+    }
+
+    .contenedor {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 1em;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #f8f9fa;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    li.completado {
+      text-decoration: line-through;
+      color: gray;
+    }
+
+    .acciones button {
+      margin-left: 5px;
+      background-color: #dc3545;
+      padding: 5px 8px;
+      border: none;
+      border-radius: 4px;
+      color: white;
+    }
+
+    .acciones .completar {
+      background-color: #17a2b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h2>📋 Lista de Tareas</h2>
+    <input type="text" id="nuevaTarea" placeholder="Escribe una tarea...">
+    <button onclick="agregarTarea()">Agregar</button>
+    <ul id="listaTareas"></ul>
+  </div>
+
+  <script>
+    const listaTareas = document.getElementById('listaTareas');
+    const inputTarea = document.getElementById('nuevaTarea');
+
+    // Cargar tareas desde localStorage al inicio
+    window.onload = () => {
+      const tareasGuardadas = JSON.parse(localStorage.getItem('tareas')) || [];
+      tareasGuardadas.forEach(tarea => crearElementoTarea(tarea.texto, tarea.completado));
+    };
+
+    function agregarTarea() {
+      const texto = inputTarea.value.trim();
+      if (texto === '') return;
+      crearElementoTarea(texto);
+      inputTarea.value = '';
+      guardarTareas();
+    }
+
+    function crearElementoTarea(texto, completado = false) {
+      const li = document.createElement('li');
+      if (completado) li.classList.add('completado');
+      li.textContent = texto;
+
+      const acciones = document.createElement('div');
+      acciones.classList.add('acciones');
+
+      const btnCompletar = document.createElement('button');
+      btnCompletar.textContent = '✔';
+      btnCompletar.classList.add('completar');
+      btnCompletar.onclick = () => {
+        li.classList.toggle('completado');
+        guardarTareas();
+      };
+
+      const btnEliminar = document.createElement('button');
+      btnEliminar.textContent = '🗑';
+      btnEliminar.onclick = () => {
+        listaTareas.removeChild(li);
+        guardarTareas();
+      };
+
+      acciones.appendChild(btnCompletar);
+      acciones.appendChild(btnEliminar);
+      li.appendChild(acciones);
+
+      listaTareas.appendChild(li);
+      guardarTareas();
+    }
+
+    function guardarTareas() {
+      const tareas = [];
+      listaTareas.querySelectorAll('li').forEach(li => {
+        tareas.push({
+          texto: li.firstChild.textContent,
+          completado: li.classList.contains('completado')
+        });
+      });
+      localStorage.setItem('tareas', JSON.stringify(tareas));
+    }
+  </script>
+</body>
+</html>
